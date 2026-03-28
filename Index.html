@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shakil Chicken Shop Chimur | Fresh Chicken Delivered</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        :root {
+            --primary: #d32f2f;
+        }
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        .logo-text {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #d32f2f;
+            letter-spacing: -2px;
+        }
+        .hero-bg {
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://picsum.photos/id/1015/1920/1080') center/cover no-repeat;
+        }
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #d32f2f;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .toast {
+            animation: toastIn 0.3s ease forwards;
+        }
+        @keyframes toastIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Storage Warning -->
+    <div id="storage-warning" class="hidden bg-amber-100 border-b border-amber-300 text-amber-800 py-3 text-center text-sm font-medium">
+        ⚠️ LocalStorage is blocked in this environment. Cart, login, and orders will reset on refresh.
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-12 h-12 bg-red-600 rounded-3xl flex items-center justify-center text-white text-3xl shadow-inner">
+                        🐔
+                    </div>
+                    <div>
+                        <h1 class="logo-text">Shakil Chicken</h1>
+                        <p class="text-[10px] text-gray-500 -mt-1 tracking-widest">CHIMUR • MAHARASHTRA</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a onclick="navigateTo('home')" class="nav-link text-gray-700 hover:text-red-600 cursor-pointer">Home</a>
+                    <a onclick="navigateTo('shop')" class="nav-link text-gray-700 hover:text-red-600 cursor-pointer">Shop</a>
+                    <a onclick="navigateTo('cart')" class="nav-link text-gray-700 hover:text-red-600 cursor-pointer flex items-center gap-1">
+                        <i class="fas fa-shopping-cart"></i>
+                        Cart <span id="cart-count" class="ml-1 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">0</span>
+                    </a>
+                    <a onclick="navigateTo('orders')" class="nav-link text-gray-700 hover:text-red-600 cursor-pointer">Orders</a>
+                    <a onclick="navigateTo('bulk')" class="nav-link text-gray-700 hover:text-red-600 cursor-pointer">Bulk</a>
+                    
+                    <div class="flex items-center gap-4">
+                        <button onclick="showLoginModal()" id="login-btn"
+                                class="px-6 py-2.5 text-sm font-semibold border-2 border-red-600 text-red-600 rounded-3xl hover:bg-red-600 hover:text-white transition-all">
+                            Login
+                        </button>
+                        <button onclick="logout()" id="logout-btn"
+                                class="hidden px-6 py-2.5 text-sm font-semibold bg-red-600 text-white rounded-3xl hover:bg-red-700 transition-all">
+                            Logout
+                        </button>
+                        <div onclick="showProfile()" id="user-avatar"
+                             class="hidden w-9 h-9 bg-red-100 hover:bg-red-200 text-red-700 rounded-3xl flex items-center justify-center text-xl font-bold cursor-pointer transition-all">
+                            A
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Hamburger -->
+                <button onclick="toggleMobileMenu()" class="md:hidden text-3xl text-gray-700">
+                    <i class="fas fa-bars" id="mobile-menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t py-6 px-6">
+            <div class="flex flex-col gap-5 text-base">
+                <a onclick="navigateTo('home');toggleMobileMenu()" class="py-2">Home</a>
+                <a onclick="navigateTo('shop');toggleMobileMenu()" class="py-2">Shop</a>
+                <a onclick="navigateTo('cart');toggleMobileMenu()" class="py-2">Cart</a>
+                <a onclick="navigateTo('orders');toggleMobileMenu()" class="py-2">My Orders</a>
+                <a onclick="navigateTo('bulk');toggleMobileMenu()" class="py-2">Bulk Order</a>
+                <div class="pt-4 border-t flex flex-col gap-3">
+                    <button onclick="showLoginModal();toggleMobileMenu()" id="mobile-login-btn"
+                            class="py-3 border-2 border-red-600 text-red-600 rounded-3xl font-semibold">Login</button>
+                    <button onclick="logout();toggleMobileMenu()" id="mobile-logout-btn"
+                            class="hidden py-3 bg-red-600 text-white rounded-3xl font-semibold">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HOME -->
+    <section id="home" class="section active">
+        <div class="hero-bg h-screen flex items-center text-white">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="max-w-2xl">
+                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-5 py-2 rounded-full mb-6 text-sm">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        Fresh Daily from Chimur Farms
+                    </div>
+                    <h1 class="text-6xl md:text-7xl font-bold leading-none tracking-tighter mb-6">
+                        Premium Fresh<br>Chicken Delivered
+                    </h1>
+                    <p class="text-xl md:text-2xl mb-10 text-white/90">
+                        Boiler ₹200/kg • Hydrabadi ₹380/kg • Koklere ₹180/kg • Gaorani ₹800/kg
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="navigateTo('shop')" 
+                                class="bg-white text-red-600 px-10 py-5 rounded-3xl font-semibold text-lg flex items-center gap-3 hover:scale-105 transition">
+                            <i class="fas fa-store"></i> Shop Now
+                        </button>
+                        <button onclick="navigateTo('bulk')" 
+                                class="border-2 border-white px-10 py-5 rounded-3xl font-semibold text-lg hover:bg-white hover:text-red-600 transition">
+                            Bulk Orders
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trust -->
+        <div class="py-8 bg-white border-b">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div><i class="fas fa-leaf text-4xl text-green-600 mb-3"></i><p class="font-medium">Farm Fresh</p></div>
+                <div><i class="fas fa-shield-alt text-4xl text-blue-600 mb-3"></i><p class="font-medium">Halal Certified</p></div>
+                <div><i class="fas fa-truck text-4xl text-orange-600 mb-3"></i><p class="font-medium">Fast Delivery</p></div>
+                <div><i class="fas fa-star text-4xl text-yellow-500 mb-3"></i><p class="font-medium">4.9 Rating</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHOP -->
+    <section id="shop" class="section">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="flex justify-between items-end mb-10">
+                <div>
+                    <h1 class="text-4xl font-bold">Our Chicken Range</h1>
+                    <p class="text-gray-500">All prices per kg • Minimum 0.5 kg</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="products-grid"></div>
+        </div>
+    </section>
+
+    <!-- CART -->
+    <section id="cart" class="section">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <h1 class="text-4xl font-bold mb-8">Your Cart</h1>
+            
+            <div id="cart-empty" class="hidden text-center py-20">
+                <i class="fas fa-shopping-bag text-8xl text-gray-200 mb-6"></i>
+                <h3 class="text-2xl font-medium">Your cart is empty</h3>
+                <button onclick="navigateTo('shop')" class="mt-6 bg-red-600 text-white px-8 py-4 rounded-3xl">Browse Chicken</button>
+            </div>
+            
+            <div id="cart-content" class="hidden bg-white rounded-3xl shadow">
+                <table class="w-full">
+                    <thead class="border-b">
+                        <tr class="text-left text-gray-500 text-sm">
+                            <th class="p-8">Product</th>
+                            <th class="p-8">Quantity (kg)</th>
+                            <th class="p-8">Price/kg</th>
+                            <th class="p-8 text-right">Subtotal</th>
+                            <th class="p-8 w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cart-items" class="divide-y"></tbody>
+                </table>
+                
+                <div class="p-8 flex justify-between items-center border-t">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total (incl. 5% GST)</p>
+                        <p id="cart-total" class="text-5xl font-bold text-red-600">₹0</p>
+                    </div>
+                    <button onclick="proceedToCheckout()" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-12 py-6 rounded-3xl font-semibold text-lg flex items-center gap-3">
+                        Checkout <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHECKOUT -->
+    <section id="checkout" class="section">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <h1 class="text-4xl font-bold mb-2">Checkout</h1>
+            <p class="text-gray-500 mb-10">Cash on Delivery Available</p>
+            
+            <div class="grid md:grid-cols-5 gap-10">
+                <!-- Form -->
+                <div class="md:col-span-3 bg-white rounded-3xl p-10">
+                    <h2 class="font-semibold text-xl mb-6">Delivery Information</h2>
+                    <form id="checkout-form" onsubmit="placeOrder(event)">
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Name</label>
+                                    <input type="text" id="name" value="Aryan" required class="w-full px-6 py-4 border rounded-2xl focus:outline-none focus:border-red-400">
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Phone</label>
+                                    <input type="tel" id="phone" value="9876543210" required class="w-full px-6 py-4 border rounded-2xl focus:outline-none focus:border-red-400">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2">Full Address</label>
+                                <textarea id="address" rows="4" required class="w-full px-6 py-4 border rounded-3xl focus:outline-none focus:border-red-400">Near Bus Stand, Chimur, Maharashtra 442904</textarea>
+                            </div>
+                            <button type="submit" 
+                                    class="w-full bg-red-600 text-white py-6 rounded-3xl text-xl font-semibold hover:bg-red-700">
+                                Place Order - Pay on Delivery
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Summary -->
+                <div class="md:col-span-2 bg-white rounded-3xl p-10 h-fit">
+                    <h2 class="font-semibold text-xl mb-6">Order Summary</h2>
+                    <div id="checkout-summary" class="space-y-5"></div>
+                    <div class="border-t pt-6 mt-8">
+                        <div class="flex justify-between text-sm mb-2"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+                        <div class="flex justify-between text-sm mb-2"><span>GST (5%)</span><span id="gst">₹0</span></div>
+                        <div class="flex justify-between text-2xl font-bold mt-4"><span>Total</span><span id="final-total" class="text-red-600">₹0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="orders" class="section">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <h1 class="text-4xl font-bold mb-8">My Orders</h1>
+            <div id="orders-list" class="space-y-6"></div>
+        </div>
+    </section>
+
+    <!-- BULK -->
+    <section id="bulk" class="section">
+        <div class="max-w-2xl mx-auto px-6 py-20">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold mb-4">Bulk Order</h1>
+                <p class="text-lg text-gray-600">For Hotels, Restaurants, Events • Min 50 kg</p>
+            </div>
+            <form onsubmit="submitBulk(event)" class="bg-white rounded-3xl p-10 shadow">
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-xs uppercase tracking-widest text-gray-500">Name / Business</label>
+                        <input id="bulk-name" type="text" value="Aryan Catering" required class="w-full mt-2 px-6 py-4 border rounded-2xl">
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-xs uppercase tracking-widest text-gray-500">Phone</label>
+                            <input id="bulk-phone" type="tel" value="9876543210" required class="w-full mt-2 px-6 py-4 border rounded-2xl">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase tracking-widest text-gray-500">Quantity (kg)</label>
+                            <input id="bulk-qty" type="number" min="50" value="100" required class="w-full mt-2 px-6 py-4 border rounded-2xl">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-widest text-gray-500">Chicken Type</label>
+                        <select id="bulk-type" class="w-full mt-2 px-6 py-4 border rounded-2xl">
+                            <option value="Boiler">Boiler - ₹200/kg</option>
+                            <option value="Hydrabadi">Hydrabadi - ₹380/kg</option>
+                            <option value="Koklere">Koklere - ₹180/kg</option>
+                            <option value="Gaorani">Gaorani - ₹800/kg</option>
+                        </select>
+                    </div>
+                    <button type="submit" 
+                            class="w-full py-6 bg-red-600 text-white rounded-3xl font-bold text-xl hover:bg-red-700">
+                        Submit Bulk Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- CONSUMER DASHBOARD -->
+    <section id="consumer-dashboard" class="section">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="mb-10">
+                <h1 class="text-4xl font-bold">Welcome back, Aryan!</h1>
+                <p class="text-gray-500">Shakil Chicken Shop Chimur • Consumer Portal</p>
+            </div>
+            <div id="consumer-content">
+                <!-- populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ADMIN PANEL -->
+    <section id="admin-panel" class="section">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="flex items-center justify-between mb-12">
+                <h1 class="text-4xl font-bold flex items-center gap-4">
+                    <i class="fas fa-crown text-amber-500"></i> Admin Dashboard
+                </h1>
+                <div class="bg-amber-100 text-amber-700 px-6 py-3 rounded-3xl text-sm font-semibold">AGD • Owner</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-10 rounded-3xl shadow">
+                    <p class="text-6xl font-bold text-green-600">₹18,450</p>
+                    <p class="text-sm text-gray-500 mt-3">Today's Revenue</p>
+                </div>
+                <div class="bg-white p-10 rounded-3xl shadow">
+                    <p class="text-6xl font-bold text-blue-600">19</p>
+                    <p class="text-sm text-gray-500 mt-3">Orders Today</p>
+                </div>
+                <div class="bg-white p-10 rounded-3xl shadow">
+                    <p class="text-6xl font-bold text-purple-600">312 kg</p>
+                    <p class="text-sm text-gray-500 mt-3">Stock Remaining</p>
+                </div>
+            </div>
+            <div class="mt-12 bg-white rounded-3xl p-8">
+                <h3 class="font-semibold mb-6">Recent Orders (Admin)</h3>
+                <div id="admin-orders" class="text-sm"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOGIN MODAL -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[10000]">
+        <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-md w-full mx-4 overflow-hidden">
+            <div class="p-10">
+                <h2 class="text-3xl font-bold text-center mb-8">Login to Shakil Chicken</h2>
+                
+                <div class="flex mb-8 border-b">
+                    <button onclick="switchAuthTab(0)" id="tab-customer" 
+                            class="flex-1 pb-4 border-b-4 border-red-600 text-red-600 font-semibold">Customer</button>
+                    <button onclick="switchAuthTab(1)" id="tab-admin" 
+                            class="flex-1 pb-4 text-gray-400">Admin</button>
+                </div>
+                
+                <input id="username" type="text" value="AGD" placeholder="Username" 
+                       class="w-full px-6 py-4 border rounded-2xl mb-4 focus:outline-none focus:border-red-400">
+                <input id="password" type="password" value="12345" placeholder="Password" 
+                       class="w-full px-6 py-4 border rounded-2xl mb-8 focus:outline-none focus:border-red-400">
+                
+                <button onclick="handleLogin()" 
+                        class="w-full py-5 bg-red-600 text-white font-semibold text-lg rounded-3xl">Login</button>
+                
+                <p class="text-center text-xs text-gray-400 mt-8">
+                    Demo: <strong>AGD</strong> / <strong>12345</strong><br>
+                    Works for both Customer & Admin
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Safe localStorage
+        let STORAGE_AVAILABLE = true;
+        try {
+            localStorage.setItem('_test', '1');
+            localStorage.removeItem('_test');
+        } catch (e) {
+            STORAGE_AVAILABLE = false;
+            document.getElementById('storage-warning').classList.remove('hidden');
+        }
+
+        function safeSet(key, value) {
+            if (!STORAGE_AVAILABLE) return;
+            try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) {}
+        }
+        function safeGet(key, fallback = null) {
+            if (!STORAGE_AVAILABLE) return fallback;
+            try {
+                const val = localStorage.getItem(key);
+                return val ? JSON.parse(val) : fallback;
+            } catch(e) { return fallback; }
+        }
+        function safeRemove(key) {
+            if (!STORAGE_AVAILABLE) return;
+            try { localStorage.removeItem(key); } catch(e) {}
+        }
+
+        // Data
+        let cart = [];
+        let orders = [];
+        let currentUser = null;
+        let isAdminLogged = false;
+
+        const products = [
+            {id:1, name:"Boiler Chicken", price:200, img:"🐔", desc:"Fresh broiler chicken"},
+            {id:2, name:"Hydrabadi Chicken", price:380, img:"🌶️🐔", desc:"Spicy Hyderabadi breed"},
+            {id:3, name:"Koklere Chicken", price:180, img:"🐔", desc:"Juicy & affordable"},
+            {id:4, name:"Gaorani Chicken", price:800, img:"🏆🐔", desc:"Premium desi gaorani"}
+        ];
+
+        // Render Products
+        function renderProducts() {
+            const container = document.getElementById('products-grid');
+            container.innerHTML = '';
+            products.forEach(product => {
+                const div = document.createElement('div');
+                div.className = "product-card bg-white rounded-3xl overflow-hidden border";
+                div.innerHTML = `
+                    <div class="h-48 flex items-center justify-center bg-gray-50 text-8xl">${product.img}</div>
+                    <div class="p-6">
+                        <h3 class="font-semibold text-xl">${product.name}</h3>
+                        <p class="text-gray-500 text-sm mt-1">${product.desc}</p>
+                        <div class="flex items-end justify-between mt-6">
+                            <div>
+                                <span class="text-4xl font-bold text-red-600">₹${product.price}</span>
+                                <span class="text-gray-400 text-sm">/kg</span>
+                            </div>
+                            <button onclick="addToCart(${product.id})" 
+                                    class="bg-red-600 text-white px-8 py-3 rounded-3xl text-sm font-medium hover:bg-red-700">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty = (existing.qty || 1) + 1;
+            } else {
+                cart.push({...product, qty: 1});
+            }
+            
+            safeSet('cart', cart);
+            updateCartCount();
+            showToast(`✅ Added ${product.name}`);
+            
+            if (document.getElementById('cart').classList.contains('active')) renderCart();
+        }
+
+        function updateCartCount() {
+            let count = 0;
+            cart.forEach(item => count += (item.qty || 1));
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        function renderCart() {
+            const empty = document.getElementById('cart-empty');
+            const content = document.getElementById('cart-content');
+            const tbody = document.getElementById('cart-items');
+            
+            if (cart.length === 0) {
+                empty.classList.remove('hidden');
+                content.classList.add('hidden');
+                return;
+            }
+            
+            empty.classList.add('hidden');
+            content.classList.remove('hidden');
+            
+            let html = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                const subtotal = item.price * (item.qty || 1);
+                total += subtotal;
+                html += `
+                    <tr class="border-b last:border-0">
+                        <td class="p-8">
+                            <div class="flex items-center gap-4">
+                                <span class="text-4xl">${item.img}</span>
+                                <div>
+                                    <div class="font-medium">${item.name}</div>
+                                    <div class="text-xs text-gray-400">${item.desc}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-8 font-medium">${item.qty || 1} kg</td>
+                        <td class="p-8">₹${item.price}</td>
+                        <td class="p-8 text-right font-semibold">₹${subtotal}</td>
+                        <td class="p-8">
+                            <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            document.getElementById('cart-total').innerHTML = `₹${Math.round(total * 1.05)} <span class="text-base font-normal text-gray-400">(incl. GST)</span>`;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            safeSet('cart', cart);
+            renderCart();
+            updateCartCount();
+        }
+
+        function proceedToCheckout() {
+            if (cart.length === 0) {
+                alert("Cart is empty");
+                return;
+            }
+            navigateTo('checkout');
+            renderCheckoutSummary();
+        }
+
+        function renderCheckoutSummary() {
+            let subtotal = 0;
+            let html = '';
+            
+            cart.forEach(item => {
+                const sub = item.price * (item.qty || 1);
+                subtotal += sub;
+                html += `
+                    <div class="flex justify-between items-center py-2">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">${item.img}</span>
+                            <div>${item.name} × ${item.qty || 1}kg</div>
+                        </div>
+                        <div>₹${sub}</div>
+                    </div>
+                `;
+            });
+            
+            const gst = Math.round(subtotal * 0.05);
+            const final = subtotal + gst;
+            
+            document.getElementById('checkout-summary').innerHTML = html;
+            document.getElementById('subtotal').textContent = `₹${subtotal}`;
+            document.getElementById('gst').textContent = `₹${gst}`;
+            document.getElementById('final-total').textContent = `₹${final}`;
+        }
+
+        function placeOrder(e) {
+            e.preventDefault();
+            
+            if (cart.length === 0) return;
+            
+            const subtotal = cart.reduce((sum, item) => sum + item.price * (item.qty || 1), 0);
+            const gst = Math.round(subtotal * 0.05);
+            const total = subtotal + gst;
+            
+            const newOrder = {
+                id: "ORD" + Math.floor(100000 + Math.random()*900000),
+                date: new Date().toLocaleDateString('en-IN'),
+                items: JSON.parse(JSON.stringify(cart)),
+                total: total,
+                status: "Confirmed"
+            };
+            
+            orders.unshift(newOrder);
+            safeSet('orders', orders);
+            
+            // Clear cart
+            cart = [];
+            safeSet('cart', cart);
+            updateCartCount();
+            
+            alert(`🎉 Order Placed Successfully!\n\nOrder ID: ${newOrder.id}\nTotal: ₹${total}\n\nThank you for shopping at Shakil Chicken Shop Chimur!`);
+            
+            navigateTo('orders');
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-list');
+            if (orders.length === 0) {
+                container.innerHTML = `<div class="bg-white rounded-3xl p-12 text-center"><p class="text-gray-400">No orders yet</p></div>`;
+                return;
+            }
+            
+            let html = '';
+            orders.forEach(order => {
+                html += `
+                    <div class="bg-white rounded-3xl p-8 flex flex-col md:flex-row gap-6">
+                        <div class="flex-1">
+                            <div class="font-mono text-red-600">${order.id}</div>
+                            <div class="text-sm text-gray-400">${order.date}</div>
+                            <div class="mt-4 space-y-1">
+                                ${order.items.map(i => `<div class="text-sm">${i.img} ${i.name} × ${i.qty||1}kg</div>`).join('')}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold text-red-600">₹${order.total}</div>
+                            <div class="text-xs bg-green-100 text-green-700 px-4 py-1 inline-block rounded-3xl mt-3">${order.status}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderConsumerDashboard() {
+            const container = document.getElementById('consumer-content');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-3xl p-8">
+                        <p class="text-red-600 font-medium text-sm">TOTAL ORDERS</p>
+                        <p class="text-7xl font-bold text-red-600 mt-2">${orders.length}</p>
+                    </div>
+                    <div class="bg-white rounded-3xl p-8">
+                        <p class="text-emerald-600 font-medium text-sm">FAVOURITE</p>
+                        <p class="text-4xl font-bold mt-6">Gaorani Chicken</p>
+                    </div>
+                    <div onclick="navigateTo('orders')" class="bg-white rounded-3xl p-8 cursor-pointer">
+                        <p class="text-amber-600 font-medium text-sm">LAST ORDER</p>
+                        <p class="mt-6 text-lg">${orders.length ? orders[0].id + ' • ' + orders[0].date : 'No orders yet'}</p>
+                    </div>
+                </div>
+                <div class="mt-12">
+                    <h3 class="font-semibold mb-4">Recent Activity</h3>
+                    <div class="bg-white rounded-3xl p-8 text-sm">${orders.length ? 'Your recent orders are shown in My Orders section.' : 'Place your first order!'}</div>
+                </div>
+            `;
+        }
+
+        function renderAdminPanel() {
+            const container = document.getElementById('admin-orders');
+            let html = `<table class="w-full"><thead><tr class="text-left text-gray-400"><th class="pb-4">Order ID</th><th class="pb-4">Date</th><th class="pb-4">Total</th><th class="pb-4">Status</th></tr></thead><tbody>`;
+            
+            orders.forEach(order => {
+                html += `<tr class="border-t"><td class="py-5 font-mono">${order.id}</td><td class="py-5">${order.date}</td><td class="py-5 font-semibold">₹${order.total}</td><td class="py-5"><span class="bg-green-100 text-green-700 px-5 py-1 text-xs rounded-full">${order.status}</span></td></tr>`;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html || '<p class="text-gray-400">No orders yet</p>';
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('username').value.trim().toUpperCase();
+            const password = document.getElementById('password').value;
+            
+            if (username === "AGD" && password === "12345") {
+                currentUser = "AGD";
+                isAdminLogged = document.getElementById('tab-admin').classList.contains('border-b-4');
+                
+                safeSet('currentUser', currentUser);
+                safeSet('isAdmin', isAdminLogged);
+                
+                hideLoginModal();
+                
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                document.getElementById('user-avatar').classList.remove('hidden');
+                
+                document.getElementById('mobile-login-btn').classList.add('hidden');
+                document.getElementById('mobile-logout-btn').classList.remove('hidden');
+                
+                if (isAdminLogged) {
+                    navigateTo('admin-panel');
+                    renderAdminPanel();
+                } else {
+                    navigateTo('consumer-dashboard');
+                    renderConsumerDashboard();
+                }
+            } else {
+                alert("Invalid credentials.\nDemo: AGD / 12345");
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            isAdminLogged = false;
+            safeRemove('currentUser');
+            safeRemove('isAdmin');
+            
+            document.getElementById('login-btn').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
+            document.getElementById('user-avatar').classList.add('hidden');
+            
+            document.getElementById('mobile-login-btn').classList.remove('hidden');
+            document.getElementById('mobile-logout-btn').classList.add('hidden');
+            
+            navigateTo('home');
+        }
+
+        function showProfile() {
+            if (isAdminLogged) navigateTo('admin-panel');
+            else navigateTo('consumer-dashboard');
+        }
+
+        function submitBulk(e) {
+            e.preventDefault();
+            const name = document.getElementById('bulk-name').value;
+            const qty = document.getElementById('bulk-qty').value;
+            alert(`✅ Bulk order request received!\n\nName: ${name}\nQuantity: ${qty} kg\nOur team will contact you shortly.`);
+            navigateTo('home');
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 bg-red-600 text-white px-6 py-4 rounded-3xl shadow-2xl toast flex items-center gap-3 z-[99999]';
+            toast.innerHTML = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2800);
+        }
+
+        function navigateTo(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const el = document.getElementById(section);
+            if (el) el.classList.add('active');
+            
+            if (section === 'cart') renderCart();
+            if (section === 'orders') renderOrders();
+            if (section === 'admin-panel') renderAdminPanel();
+            if (section === 'consumer-dashboard') renderConsumerDashboard();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                icon.classList.replace('fa-bars', 'fa-xmark');
+            } else {
+                menu.classList.add('hidden');
+                icon.classList.replace('fa-xmark', 'fa-bars');
+            }
+        }
+
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+            document.getElementById('login-modal').classList.add('flex');
+        }
+
+        function hideLoginModal() {
+            const modal = document.getElementById('login-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function switchAuthTab(n) {
+            const cust = document.getElementById('tab-customer');
+            const adm = document.getElementById('tab-admin');
+            if (n === 0) {
+                cust.classList.add('border-b-4', 'border-red-600', 'text-red-600');
+                adm.classList.remove('border-b-4', 'border-red-600', 'text-red-600');
+            } else {
+                adm.classList.add('border-b-4', 'border-red-600', 'text-red-600');
+                cust.classList.remove('border-b-4', 'border-red-600', 'text-red-600');
+            }
+        }
+
+        // Init
+        function initApp() {
+            // Load data
+            cart = safeGet('cart', []);
+            orders = safeGet('orders', []);
+            
+            const savedUser = safeGet('currentUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                isAdminLogged = safeGet('isAdmin', false);
+                
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                document.getElementById('user-avatar').classList.remove('hidden');
+                
+                document.getElementById('mobile-login-btn').classList.add('hidden');
+                document.getElementById('mobile-logout-btn').classList.remove('hidden');
+            }
+            
+            renderProducts();
+            updateCartCount();
+            
+            // Show home by default
+            navigateTo('home');
+            
+            console.log('%c✅ Shakil Chicken Shop Chimur - 100% Working Version Ready', 'background:#d32f2f;color:white;padding:6px 12px;border-radius:9999px;font-weight:bold');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
